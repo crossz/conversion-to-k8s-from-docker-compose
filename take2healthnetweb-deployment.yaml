@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert
+    kompose.version: 1.27.0 (b0ed6a2c9)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: take2healthnetweb
+  name: take2healthnetweb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: take2healthnetweb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert
+        kompose.version: 1.27.0 (b0ed6a2c9)
+      creationTimestamp: null
+      labels:
+        io.kompose.service: take2healthnetweb
+    spec:
+      containers:
+        - env:
+            - name: NGINX_HOST
+              value: localhost
+            - name: NGINX_PORT
+              value: "80"
+          image: nginx
+          name: take2healthnetweb
+          ports:
+            - containerPort: 80
+          resources: {}
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html
+              name: take2healthnetweb-claim0
+            - mountPath: /etc/nginx/templates
+              name: take2healthnetweb-claim1
+            - mountPath: /var/log/nginx
+              name: take2healthnetweb-claim2
+      restartPolicy: Always
+      volumes:
+        - name: take2healthnetweb-claim0
+          persistentVolumeClaim:
+            claimName: take2healthnetweb-claim0
+        - name: take2healthnetweb-claim1
+          persistentVolumeClaim:
+            claimName: take2healthnetweb-claim1
+        - name: take2healthnetweb-claim2
+          persistentVolumeClaim:
+            claimName: take2healthnetweb-claim2
+status: {}

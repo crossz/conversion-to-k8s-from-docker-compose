@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  creationTimestamp: null
+  labels:
+    io.kompose.service: take2healthnetweb-claim0
+  name: take2healthnetweb-pv0
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: mount0
+  capacity:
+    storage: 210Mi
+  hostPath:
+    path: "/home/crosssz/Downloads/test/html"
+status: {}

@@ -1,0 +1,17 @@
+version: "3.3"
+
+services:
+  take2healthnetweb:
+    image: nginx
+    volumes:
+     - /home/crosssz/Downloads/test/html:/usr/share/nginx/html
+     #- ./nginx.conf:/etc/nginx/nginx.conf
+     - ./templates:/etc/nginx/templates
+    #- ./conf.d:/etc/nginx/conf.d
+     - ./log:/var/log/nginx
+    ports:
+     - "28090:80"
+    restart: always
+    environment:
+     - NGINX_HOST=localhost
+     - NGINX_PORT=80

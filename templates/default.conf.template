@@ -1,0 +1,178 @@
+server {
+  listen       ${NGINX_PORT};   # Port to listen on
+  server_name  ${NGINX_HOST};
+
+  absolute_redirect off;
+
+  ##
+  # gzip
+  ##
+  gzip on;
+  gzip_comp_level 5;
+  gzip_min_length 1k;
+  gzip_buffers 4 16k;
+  gzip_proxied any;
+  gzip_types
+    application/javascript
+    application/x-javascript
+    text/javascript
+    text/css
+    text/xml
+    application/xhtml+xml
+    application/xml
+    application/atom+xml
+    application/rdf+xml
+    application/rss+xml
+    application/geo+json
+    application/json
+    application/ld+json
+    application/manifest+json
+    application/x-web-app-manifest+json
+    image/svg+xml
+    text/x-cross-domain-policy;
+  gzip_static on;
+  gzip_disable "MSIE [1-6]\.";
+
+
+##
+# add_header Cache-Control "public, max-age=31536000, immutable"; Security headers
+##
+add_header Strict-Transport-Security "max-age=600; includeSubDomains";
+#add_header Strict-Transport-Security "max-age=600; includeSubDomains; preload";
+#add_header Strict-Transport-Security "max-age=600; includeSubDomains; always";
+add_header X-Frame-Options DENY;
+add_header X-Content-Type-Options nosniff;
+#add_header Content-Security-Policy "default-src 'self' www.google-analytics.com ajax.googleapis.com www.google.com google.com gstatic.com www.gstatic.com connect.facebook.net facebook.com;";
+add_header X-XSS-Protection "1; mode=block";
+add_header Referrer-Policy "origin";
+#add_header Cache-Control "public, max-age=0, immutable";
+
+
+##
+# main routes
+##
+
+#location / {
+#   return 308 ${NGINX_HOST}/zh-HK$request_uri;
+#}
+#location ~* ^(/|/zh-HK/|/zh-CN/|en/).+\.html$ {
+#  root /usr/share/nginx/html;
+#  add_header Cache-Control "public, max-age=0, must-revalidate";
+#}
+#location ~ "^/(en|zh-CN|zh-HK).*" {
+#  root /usr/share/nginx/html;
+#  index index.html;
+#  error_page 404 /404.html;
+#  try_files $uri $uri/ =404;
+#}
+#
+    location / {
+      root /usr/share/nginx/html;
+      index index.html;
+      # 增加下列命令，index.html可换为项目中使用的其它文件名
+      try_files $uri $uri/ index.html;
+    }
+
+location @404 {
+  #rewrite ^.*$ /404.html last; # rewrite returns only code 301 or 302.
+  #proxy_pass $host$port/404.html; # always return 502, whole site down.
+
+  #return 301 /index.html; # this is ok. but not good for 404.
+  return 404 /index.html;
+}
+
+
+
+
+##
+# Conditional cache
+##
+## NOTE: this doesn't work, Nginx will not pick this.
+#location ~* ^(/|/zh-HK/|/zh-CN/|en/).+\.html$ {
+#  root /usr/share/nginx/html;
+#  add_header Cache-Control "public, max-age=0, must-revalidate";
+#}
+
+location ~* ^/.+\.(js|css)$ {
+  root /usr/share/nginx/html;
+  add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+## static files
+  ### this is declared as common usage, even same effect to the follow 'static' regular expression.
+location ~* (.+\.(jpg|jpeg|gif|png|webp|woff|woff2))$ {
+  root /usr/share/nginx/html;
+  add_header Cache-Control "public, max-age=31536000, immutable";
+}
+  ### this is declared because of language selector 308 redirect, kinda abnormal config
+location ~* /static {
+  root /usr/share/nginx/html;
+  add_header Cache-Control "public, max-age=31536000, immutable";
+}
+
+## gatsby *-data.json files
+location ^~ /page-data/app-data.json {
+  root /usr/share/nginx/html;
+  add_header Cache-Control "public, max-age=0, immutable";
+}
+location ~* /page-data {
+  root /usr/share/nginx/html;
+  add_header Cache-Control "public, max-age=0, immutable";
+}
+
+## defaultLanguage settings - seo files
+location ^~ /sitemap/ {
+  root /usr/share/nginx/html;
+}
+location ~* \.(xml|txt)$ {
+  root /usr/share/nginx/html;
+}
+
+## misc
+location ~* /sw.js {
+  root /usr/share/nginx/html;
+  add_header Cache-Control "public, max-age=0, immutable";
+}
+
+
+###
+## main routes
+###
+#location ~* ^/.+\.(html)$ {
+#  root /usr/share/nginx/html;
+#  add_header Cache-Control "public, max-age=0, must-revalidate";
+#}
+#
+#location / {
+#   return 308 ${NGINX_HOST}/zh-HK$request_uri;
+# }
+#location ~ "^/(en|zh-CN|zh-HK).*" {
+#  root /usr/share/nginx/html;
+#  index index.html;
+#  error_page 404 /404.html;
+#  try_files $uri $uri/ =404;
+#}
+#
+##    location / {
+##      root /usr/share/nginx/html;
+##      index index.html;
+##      # 增加下列命令，index.html可换为项目中使用的其它文件名
+##      try_files $uri $uri/ index.html;
+##    }
+#
+#location @404 {
+#  #rewrite ^.*$ /404.html last; # rewrite returns only code 301 or 302.
+#  #proxy_pass $host$port/404.html; # always return 502, whole site down.
+#
+#  #return 301 /index.html; # this is ok. but not good for 404.
+#  return 404 /index.html;
+#}
+
+
+##
+# SEM caused 404 config file under server directive
+##
+include /etc/nginx/conf.d/conf/404conf*.conf;
+
+
+}
